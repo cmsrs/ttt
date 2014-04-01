@@ -41,15 +41,15 @@ display = (function() {
     }
 
     function drawTic( x_p, y_p, tic, style  ){
-        //for (var x=0;x<cols;x++) {
-        //    for (var y=0;y<rows;y++) {
-        //        if( (y ==  y_p) && ( x == x_p )  ){
+        for (var x=0;x<cols;x++) {
+            for (var y=0;y<rows;y++) {
+                if( (y ==  y_p) && ( x == x_p )  ){
                     x_start = x * ticSize;
                     y_start = y * ticSize;
                     (tic == 1) ? drawO(ctx, x_start, y_start, style) : drawX(ctx, x_start, y_start, style);
-        //        }
-        //    }
-        //}
+                }
+            }
+        }
     }
     function drawLevelCircle( lctx,  numberLevel ){
         var r = Math.floor(levelLengthCircle/2); 
