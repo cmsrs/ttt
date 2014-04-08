@@ -56,6 +56,9 @@ logic = (function() {
         return false;
     }
 
+    /**
+     * todo:optymalizacja - proba wyciagniecia tego na zew aby raz bylo wyciagane
+     */
     function getEvalEntity( matrix ){
         var k = 0;
         var eval_entity = [];
