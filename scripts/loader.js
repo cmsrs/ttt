@@ -1,9 +1,9 @@
 var ttt = {
     lang : 'en',
+    path : '',
     text : {
         pl : {
             title : 'Kółko i krzyżyk',
-            //alternative : 'Aby zagrać w grę musisz posiadać nową wersję przeglądarki (rekomendowane przeglądarki: firefox lub chrome)',
             alternative : 'Aby zagrać w grę musisz posiadać nową wersję przeglądarki (rekomendowane przeglądarki: firefox lub chrome)',
             draw : 'Remis.',
             you_win : 'Gratuluje wygraleś!',
@@ -15,7 +15,6 @@ var ttt = {
         },
         en : {
             title : 'Tic-tac-toe',
-            //alternative : 'In order to play with this game, You have to install a new web browser (recommend: firefox or chrome)',
             alternative : 'In order to play with this game, You have to install a new web browser (recommend: firefox or chrome)',
             draw : 'Draw.',
             you_win : 'Congratulations!',
@@ -76,6 +75,13 @@ window.requestAnimationFrame = (function() {
 if (Modernizr.canvas && Modernizr.webworkers ){
 
     window.addEventListener("load", function() {
+        if(typeof  lang !==  'undefined' ){
+            ttt.lang =  lang;
+        }
+        if(typeof pathToTtt !==  'undefined' ){
+            ttt.path = pathToTtt;
+        }
+
 
         var jewelProto = document.getElementById("square-size");
         var rect = jewelProto.getBoundingClientRect();

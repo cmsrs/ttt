@@ -154,8 +154,11 @@ display = (function() {
 
         var el_h1 =  document.getElementsByTagName('h1');
         var el_header =  document.getElementsByTagName('header');
-        el_header[0].style.width = widthGame + "px"; 
-        el_header[0].style.height = ticSize + "px"; 
+
+        if(  el_header.length   ){
+            el_header[0].style.width = widthGame + "px"; 
+            el_header[0].style.height = ticSize + "px"; 
+        }
         //el_h1[0].style.width = widthGame + "px";
         document.getElementById('score').style.width = widthGame + "px"; 
 
@@ -181,7 +184,10 @@ display = (function() {
 
         //console.log( el_h1[0]  );
         //el_h1[0].textContent = 'trstttt'; 
-        el_h1[0].textContent = ttt.text[lang].title;
+        //
+        if(  el_h1.length  ){
+            el_h1[0].textContent = ttt.text[lang].title;
+        }
         document.getElementById('cpu').textContent = ttt.text[lang].cpu;
         document.getElementById('you').textContent = ttt.text[lang].you;
     }
@@ -247,7 +253,7 @@ display = (function() {
 
         var think = 0;
         var play_again = 0;
-        var worker = new Worker('scripts/do.work.js');
+        var worker = new Worker( ttt.path + 'scripts/do.work.js');
         worker.postMessage({cmd:'init', conf: ttt.action }); 
 
         worker.addEventListener('message', function(e) {
