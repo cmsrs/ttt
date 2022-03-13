@@ -14,12 +14,14 @@ body
     margin-left: 3px;
     border : 1px solid #191919;
 }
+/*
 #square-size {
     position : absolute;
     width : 1em;
     height : 1em;
     left : -1000px;
 }
+*/
 header{
     margin-top: 3px;
     margin-bottom: 3px;
