@@ -11,6 +11,6 @@ More info you can find on page:
 
 http://www.cmsrs.pl/en/cms/projects/game-descrition---advanced-tic-tac-toe-for-mobile-and-stationary-devices
 
-Download as Android app:
+Install as Android app:
 
 https://play.google.com/store/apps/details?id=pl.cmsrs.ttt
