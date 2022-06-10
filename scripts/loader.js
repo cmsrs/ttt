@@ -24,7 +24,7 @@ var ttt = {
             you : 'YOU',
             cpu : 'CPU'
         }
-    }, 
+    },
     color :{
         theme_logo_blue: '#b1ccdd',
         theme_black: '#050505',
@@ -36,7 +36,8 @@ var ttt = {
     settings : {
         sizeLoader : 1,
         ticPadding : 4,
-        ticWidth : 2
+        ticWidth : 2,
+        animateCrossPoints : 20
     },
     score :{
         you: 0,

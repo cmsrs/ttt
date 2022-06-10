@@ -1,26 +1,33 @@
 display = (function() {
     var
         lang,
-        cols, 
-        rows, 
-        ticSize, 
-        ticPadding, 
-        ticWidth, 
+        cols,
+        rows,
+        ticSize,
+        ticPadding,
+        ticWidth,
         sizeLoader,
-        theme_black, 
-        theme_logo_red,  
+        theme_black,
+        theme_logo_red,
 
         divWrapLevel,
         divLevel,
         levelTextPadding,
         levelLengthCircle,
         boardElement,
-        divThink, 
-        divDisplayText, 
+        divThink,
+        divDisplayText,
         matrix,
         ctx,
         anim,
-        canvas;
+        canvas,
+
+        t,
+        points1,
+        points2,
+        animateCrossPoints
+
+        ;
 
 
     function createBackground( bgctx ){
@@ -37,22 +44,22 @@ display = (function() {
                 bgctx.fillRect( x_start, y_start, ticSize, ticSize);
                 matrix[x][y] = ttt.action.blank;
             }
-        } 
+        }
     }
 
-    function drawTic( x_p, y_p, tic, style  ){
+    function drawTic( x_p, y_p, tic, style, isAnim ){
         for (var x=0;x<cols;x++) {
             for (var y=0;y<rows;y++) {
                 if( (y ==  y_p) && ( x == x_p )  ){
                     x_start = x * ticSize;
                     y_start = y * ticSize;
-                    (tic == 1) ? drawO(ctx, x_start, y_start, style) : drawX(ctx, x_start, y_start, style);
+                    (tic == 1) ? drawO(ctx, x_start, y_start, style) : drawX(ctx, x_start, y_start, style, isAnim);
                 }
             }
         }
     }
     function drawLevelCircle( lctx,  numberLevel ){
-        var r = Math.floor(levelLengthCircle/2); 
+        var r = Math.floor(levelLengthCircle/2);
         lctx.beginPath();
         lctx.fillStyle =  ( parseInt(numberLevel) == ttt.action.max_depth  ) ? ttt.color.theme_light_blue : '#FFFFFF';
         lctx.arc( r, r , r, 0, 2 * Math.PI, false);
@@ -63,7 +70,7 @@ display = (function() {
     }
     function drawLevelNumber( lctx, numberLevel ){
         var x_start_point;
-        var x_stop_point; 
+        var x_stop_point;
         var y_start_point = Math.floor(levelLengthCircle/4);
         var y_stop_point = Math.floor(levelLengthCircle*3/4);
 
@@ -82,9 +89,9 @@ display = (function() {
     }
 
     function drawO( octx, start_x, start_y, style ){
-        var half = Math.floor(ticSize/2); 
-        var r =  half - ticPadding; 
-  
+        var half = Math.floor(ticSize/2);
+        var r =  half - ticPadding;
+
         octx.beginPath();
         octx.arc(  start_x + half, start_y + half,  r  , 0, 2 * Math.PI, false);
         octx.lineWidth =  ticWidth;
@@ -93,29 +100,88 @@ display = (function() {
 
     }
 
-    function drawX( xctx,  start_x, start_y, style  ){
+    function drawX( xctx,  start_x, start_y, style, isAnim  ){
         var endP = ticSize - ticPadding;
         var x_start_point = start_x + ticPadding;
         var x_stop_point = start_x + endP;
         var y_start_point =  start_y +  ticPadding;
         var y_stop_point =  start_y + endP;
-        
-        xctx.beginPath();
-        xctx.moveTo( x_start_point , y_start_point );
-        xctx.lineTo( x_stop_point  , y_stop_point  );
-        xctx.moveTo( x_start_point , y_stop_point  );
-        xctx.lineTo( x_stop_point  , y_start_point );
 
         xctx.lineWidth =  ticWidth;
         xctx.strokeStyle =( (style == 'black') ?  theme_black :  theme_logo_red );
-        xctx.stroke();
+
+        if(isAnim === true){
+          wrapAnimateCross(x_start_point, x_stop_point, y_start_point, y_stop_point);
+        }else{
+          //without anim
+          xctx.beginPath();
+          xctx.moveTo( x_start_point , y_start_point );
+          xctx.lineTo( x_stop_point  , y_stop_point  );
+          xctx.moveTo( x_start_point , y_stop_point  );
+          xctx.lineTo( x_stop_point  , y_start_point );
+          xctx.stroke();
+        }
+
+
     }
+
+    function wrapAnimateCross( x_start_point, x_stop_point, y_start_point, y_stop_point )
+    {
+      var line1 = [{x:x_start_point, y:y_start_point}, {x: x_stop_point, y:y_stop_point}];
+      var line2 = [{x:x_start_point, y:y_stop_point}, {x:x_stop_point, y:y_start_point}];
+
+      t = 1;
+      points1 = [];
+      points1 = calcWaypoints( line1[0], line1[1] );
+      points2 = [];
+      points2 = calcWaypoints( line2[0], line2[1] );
+
+      requestAnimationFrame(animateCross);
+    }
+
+    function calcWaypoints(pt0, pt1) {
+        var waypoints = [];
+        var dx = pt1.x - pt0.x;
+        var dy = pt1.y - pt0.y;
+        for (var j = 0; j <= animateCrossPoints; j++) {
+            var x = pt0.x + dx * j / animateCrossPoints;
+            var y = pt0.y + dy * j / animateCrossPoints;
+            waypoints.push({
+                x: x,
+                y: y
+            });
+        }
+        return waypoints;
+    }
+
+    function animateCross() {
+        if (t > points1.length - 1) {
+          return false;
+        }
+        if (t > points2.length - 1) {
+          return false;
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(points1[t - 1].x, points1[t - 1].y);
+        ctx.lineTo(points1[t].x, points1[t].y);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(points2[t - 1].x, points2[t - 1].y);
+        ctx.lineTo(points2[t].x, points2[t].y);
+        ctx.stroke();
+
+        t++;
+        requestAnimationFrame(animateCross);
+    }
+
     function createLevelCanvas( level ){
         var lCanvas = document.createElement("canvas");
         lCanvas.width = levelLengthCircle;
         lCanvas.height = levelLengthCircle;
         lCanvas.className = "circle";
-        lCanvas.style.marginRight =   Math.floor(ticSize/2)+ "px"; 
+        lCanvas.style.marginRight =   Math.floor(ticSize/2)+ "px";
         var lctx = lCanvas.getContext("2d");
         drawLevelCircle( lctx, level );
         drawLevelNumber( lctx, level );
@@ -133,7 +199,9 @@ display = (function() {
         theme_black = ttt.color.theme_black,
         theme_logo_red = ttt.color.theme_logo_red,
         theme_light_black = ttt.color.theme_light_black,
-        sizeLoader = ttt.settings.sizeLoader;
+        sizeLoader = ttt.settings.sizeLoader,
+        animateCrossPoints = ttt.settings.animateCrossPoints
+        ;
 
 
         canvas = document.createElement("canvas");
@@ -156,20 +224,20 @@ display = (function() {
         var el_header =  document.getElementsByTagName('header');
 
         if(  el_header.length   ){
-            el_header[0].style.width = widthGame + "px"; 
-            el_header[0].style.height = ticSize + "px"; 
+            el_header[0].style.width = widthGame + "px";
+            el_header[0].style.height = ticSize + "px";
         }
         //el_h1[0].style.width = widthGame + "px";
-        document.getElementById('score').style.width = widthGame + "px"; 
+        document.getElementById('score').style.width = widthGame + "px";
 
-        
+
         divWrapLevel = document.getElementById('wrapLevel');
         divLevel = document.createElement('div');
         divLevel.id  = 'level';
         divWrapLevel.appendChild(divLevel);
 
 
-        levelLengthCircle =  Math.floor( ticSize/2 ); 
+        levelLengthCircle =  Math.floor( ticSize/2 );
 
         divLevel.style.marginLeft = "3px";
         divLevel.style.width = widthGame + "px";
@@ -180,10 +248,10 @@ display = (function() {
         divLevelText.style.marginRight = levelLengthCircle + "px";
         divLevel.appendChild( divLevelText  );
 
-        levelTextPadding = Math.floor( ticSize/8 ); 
+        levelTextPadding = Math.floor( ticSize/8 );
 
         //console.log( el_h1[0]  );
-        //el_h1[0].textContent = 'trstttt'; 
+        //el_h1[0].textContent = 'trstttt';
         //
         if(  el_h1.length  ){
             el_h1[0].textContent = ttt.text[lang].title;
@@ -195,16 +263,16 @@ display = (function() {
     function displayFinish(  eval ){
         divDisplayText = document.createElement("div");
         divDisplayText.id = "display_text";
-        divDisplayText.style.width = (cols  * ticSize ) + "px"; 
-        divDisplayText.style.paddingTop =  '3px'; 
+        divDisplayText.style.width = (cols  * ticSize ) + "px";
+        divDisplayText.style.paddingTop =  '3px';
         divThink.appendChild(  divDisplayText );
         if(  eval['score'] == 0  ){
             divDisplayText.textContent =  ttt.text[lang].draw;
         }else if( eval['win'] != 0  ){
             for( var i=0; i<eval['win_xy'].length; i++  ){
-                drawTic( eval['win_xy'][i].x, eval['win_xy'][i].y,  eval['win'] , 'red' );
+                drawTic( eval['win_xy'][i].x, eval['win_xy'][i].y,  eval['win'] , 'red', false );
             }
-            if(eval['win'] == 1){ 
+            if(eval['win'] == 1){
                 ttt.score.you += 1;
                 divDisplayText.textContent =  ttt.text[lang].you_win;
             }
@@ -216,12 +284,12 @@ display = (function() {
     }
 
     function displayScore( ttt_in ){
-        document.getElementById('you_score').textContent = ttt_in.score.you; 
+        document.getElementById('you_score').textContent = ttt_in.score.you;
         document.getElementById('cpu_score').textContent = ttt_in.score.cpu;
     }
 
     function startThink(){
-        var marginLeft = Math.floor((cols -  sizeLoader)/2); 
+        var marginLeft = Math.floor((cols -  sizeLoader)/2);
 
         anim = document.createElement("div");
         anim.id = "anim";
@@ -254,12 +322,12 @@ display = (function() {
         var think = 0;
         var play_again = 0;
         var worker = new Worker( ttt.path + 'scripts/do.work.js');
-        worker.postMessage({cmd:'init', conf: ttt.action }); 
+        worker.postMessage({cmd:'init', conf: ttt.action });
 
         worker.addEventListener('message', function(e) {
             //console.log( e.data  );
             if( e.data.cmd == 'play'  ){
-                var move =   e.data.move; 
+                var move =   e.data.move;
                 if( move.is_finish != 0 ){
 
                     stopThink();
@@ -275,7 +343,7 @@ display = (function() {
                     },3000);
 
                 }else{
-                    drawTic( move.x, move.y, move.value, 'black' );
+                    drawTic( move.x, move.y, move.value, 'black', true );
                     matrix[move.x][move.y] = ttt.action.comp;
                     stopThink();
                     think = 0;
@@ -285,9 +353,9 @@ display = (function() {
 
 
         if( ttt.action.who_first == ttt.action.comp ){
-            think = 1; 
+            think = 1;
             startThink();
-            worker.postMessage({cmd:'play', matrix: matrix}); 
+            worker.postMessage({cmd:'play', matrix: matrix});
         }
 
         for(var i=1; i<=ttt.action.max_level; i++ ){
@@ -296,7 +364,7 @@ display = (function() {
             lCanvas.addEventListener("click", function(e){
                 boardElement.removeChild(canvas);
                 divWrapLevel.removeChild(divLevel);
-                var level = parseInt( this.id.match( /\d+$/ ) );            
+                var level = parseInt( this.id.match( /\d+$/ ) );
                 ttt.action.max_depth = level;
                 worker.terminate();
                 initialize( ttt  );
@@ -323,11 +391,11 @@ display = (function() {
             startThink();
             think = 1;
 
-            drawTic( ticX, ticY, ttt.action.human, 'black'   );
+            drawTic( ticX, ticY, ttt.action.human, 'black', true );
             matrix[ticX][ticY] = ttt.action.human;
 
 
-            worker.postMessage({cmd:'play', matrix: matrix}); 
+            worker.postMessage({cmd:'play', matrix: matrix});
 
         }, false);
 
